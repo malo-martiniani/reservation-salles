@@ -1,29 +1,25 @@
-// config/db.js
 import mysql from 'mysql2/promise';
-// Création du pool de connexions
+
 const pool = mysql.createPool({
-host: process.env.DB_HOST || 'localhost',
-user: process.env.DB_USER || 'root',
-password: process.env.DB_PASSWORD || '',
-database: process.env.DB_NAME || 'starter_kit',
-waitForConnections: true,
-connectionLimit: 10
+	host: process.env.DB_HOST || 'localhost',
+	port: Number(process.env.DB_PORT || 3306),
+	user: process.env.DB_USER || 'root',
+	password: process.env.DB_PASSWORD || '',
+	database: process.env.DB_NAME || 'reservation_salles',
+	waitForConnections: true,
+	connectionLimit: Number(process.env.DB_CONNECTION_LIMIT || 10),
+	queueLimit: 0,
 });
-// Fonction utilitaire pour les requêtes
+
 export async function query(sql, params = []) {
-const [results] = await pool.execute(sql, params);
-return results;
+	const [rows] = await pool.execute(sql, params);
+	return rows;
 }
-// Test de connexion
+
 export async function testConnection() {
-try {
-const connection = await pool.getConnection();
-console.log('MySQL connecté');
-connection.release();
-return true;
-} catch (error) {
-console.error('Erreur MySQL:', error.message);
-return false;
+	const connection = await pool.getConnection();
+	connection.release();
+	console.log('MySQL connecté');
 }
-}
+
 export default pool;

@@ -1,37 +1,27 @@
-// models/user.model.js
-import { query } from '../config/db.js'; // Extension .js obligatoire ! ⬅️
 import bcrypt from 'bcrypt';
+import { query } from '../config/db.js';
+
+const SALT_ROUNDS = 10;
+
 const User = {
-    // Trouver par email
     async findByEmail(email) {
-        const sql = 'SELECT * FROM users WHERE email = ?';
-        const results = await query(sql, [email.toLowerCase()]);
-        return results[0] || null;
+        const normalizedEmail = email.toLowerCase();
+        const sql = 'SELECT id, email, password, created_at FROM users WHERE email = ? LIMIT 1';
+        const rows = await query(sql, [normalizedEmail]);
+        return rows[0] || null;
     },
-    // Trouver par ID (sans le password)
-    async findById(id) {
-        const sql = 'SELECT id, email, firstname, lastname, created_at FROM users WHERE id = ?';
-        const results = await query(sql, [id]);
-        return results[0] || null;
+
+    async create({ email, password }) {
+        const normalizedEmail = email.toLowerCase();
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+        const sql = 'INSERT INTO users (email, password) VALUES (?, ?)';
+        const result = await query(sql, [normalizedEmail, hashedPassword]);
+
+        return {
+            id: result.insertId,
+            email: normalizedEmail,
+        };
     },
-    // Créer un utilisateur
-    async create({ email, password, firstname = null, lastname = null }) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const sql = `
-INSERT INTO users (email, password, firstname, lastname)
-VALUES (?, ?, ?, ?)
-`;
-        const result = await query(sql, [
-            email.toLowerCase(),
-            hashedPassword,
-            firstname,
-            lastname
-        ]);
-        return { id: result.insertId, email, firstname, lastname };
-    },
-    // Vérifier le mot de passe
-    async verifyPassword(plainPassword, hashedPassword) {
-        return bcrypt.compare(plainPassword, hashedPassword);
-    }
 };
+
 export default User;

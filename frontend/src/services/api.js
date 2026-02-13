@@ -1,36 +1,60 @@
-// services/api.js
-const API_URL = 'http://localhost:5000/api';
-async function fetchAPI(endpoint, options = {}) {
-const token = localStorage.getItem('token');
-const headers = {
-'Content-Type': 'application/json',
-...(token && { Authorization: `Bearer ${token}` })
-};
-try {
-const response = await fetch(`${API_URL}${endpoint}`, {
-...options,
-headers
+import axios from 'axios';
+
+const apiClient = axios.create({
+	baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+	headers: {
+		'Content-Type': 'application/json',
+	},
 });
-const data = await response.json();
-if (!response.ok) {
-throw { status: response.status, message: data.error || 'Erreur' };
-}
-return data;
-} catch (error) {
-if (!error.status) {
-throw { status: 0, message: 'Serveur inaccessible' };
-}
-throw error;
-}
-}
+
+apiClient.interceptors.request.use(
+	(config) => {
+		const token = localStorage.getItem('token');
+		if (token) {
+			config.headers.Authorization = `Bearer ${token}`;
+		}
+		return config;
+	},
+	(error) => Promise.reject(error),
+);
+
+apiClient.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		const status = error.response?.status || 0;
+		const message = error.response?.data?.error || 'Serveur inaccessible';
+		return Promise.reject({ status, message });
+	},
+);
+
 export const authService = {
-register: (userData) => fetchAPI('/auth/register', {
-method: 'POST',
-body: JSON.stringify(userData)
-}),
-login: (email, password) => fetchAPI('/auth/login', {
-method: 'POST',
-body: JSON.stringify({ email, password })
-}),
-getProfile: () => fetchAPI('/auth/me')
-}
+	register: async (userData) => {
+		const { data } = await apiClient.post('/auth/register', userData);
+		return data;
+	},
+	login: async (email, password) => {
+		const { data } = await apiClient.post('/auth/login', { email, password });
+		return data;
+	},
+};
+
+export const reservationService = {
+	getAll: async () => {
+		const { data } = await apiClient.get('/reservations');
+		return data;
+	},
+	create: async (payload) => {
+		const { data } = await apiClient.post('/reservations', payload);
+		return data;
+	},
+	update: async (id, payload) => {
+		const { data } = await apiClient.put(`/reservations/${id}`, payload);
+		return data;
+	},
+	remove: async (id) => {
+		const { data } = await apiClient.delete(`/reservations/${id}`);
+		return data;
+	},
+};
+
+export default apiClient;

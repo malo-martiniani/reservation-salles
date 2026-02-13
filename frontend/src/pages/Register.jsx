@@ -40,9 +40,13 @@ function Register() {
                 email: formData.email,
                 password: formData.password
             });
-            navigate('/dashboard');
+            navigate('/login', { replace: true });
         } catch (err) {
-            setError(err.message || 'Erreur lors de l\'inscription');
+            if (err.status === 409) {
+                setError('Cet email est déjà utilisé');
+            } else {
+                setError(err.message || 'Erreur lors de l\'inscription');
+            }
         } finally {
             setLoading(false);
         }
