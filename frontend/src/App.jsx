@@ -7,7 +7,7 @@ import PrivateRoute from './components/PrivateRoute.jsx';
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
-import Dashboard from './pages/Dashboard.jsx';
+import Planning from './pages/Dashboard.jsx';
 import Profile from './pages/Profile.jsx';
 function App() {
   const { loading } = useAuth();
@@ -17,18 +17,10 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
           path="/planning"
           element={
             <PrivateRoute>
-              <Dashboard />
+              <Planning />
             </PrivateRoute>
           }
         />

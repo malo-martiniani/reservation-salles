@@ -28,10 +28,10 @@ function Header() {
                     </NavLink>
                     {isAuthenticated && (
                         <NavLink
-                            to="/dashboard"
+                            to="/planning"
                             className={({ isActive }) => `hover:text-blue-200 transition ${isActive ? 'font-bold' : ''}`}
                         >
-                            Dashboard
+                            Planning
                         </NavLink>
                     )}
                     {isAuthenticated && (

@@ -21,30 +21,20 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if (!token) {
-            setLoading(false);
-            return;
-        }
+    const payload = token ? decodeTokenPayload(token) : null;
+    const isValid = payload?.id && payload?.email && payload?.exp * 1000 > Date.now();
 
-        const payload = decodeTokenPayload(token);
-        if (!payload?.id || !payload?.email) {
-            localStorage.removeItem('token');
-            setLoading(false);
-            return;
-        }
+    if (!isValid) {
+      localStorage.removeItem('token');
+    }
 
-        const isExpired = payload.exp ? payload.exp * 1000 <= Date.now() : true;
-        if (isExpired) {
-            localStorage.removeItem('token');
-            setLoading(false);
-            return;
-        }
+    queueMicrotask(() => {
+      if (isValid) setUser({ id: payload.id, email: payload.email });
+      setLoading(false);
+    });
+  }, []);
 
-        setUser({ id: payload.id, email: payload.email });
-        setLoading(false);
-    }, []);
-
-    const login = async (email, password) => {
+  const login = async (email, password) => {
         const data = await authService.login(email, password);
         localStorage.setItem('token', data.token);
         setUser(data.user);

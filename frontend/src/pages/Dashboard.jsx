@@ -22,14 +22,6 @@ function addDays(date, days) {
     return value;
 }
 
-function isSameDay(a, b) {
-    return (
-        a.getFullYear() === b.getFullYear() &&
-        a.getMonth() === b.getMonth() &&
-        a.getDate() === b.getDate()
-    );
-}
-
 function toInputDateTime(date) {
     const pad = (num) => String(num).padStart(2, '0');
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
@@ -143,7 +135,7 @@ function Dashboard() {
             <div className="max-w-7xl mx-auto">
                 <div className="mb-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Planning hebdomadaire</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">Planning</h1>
                         <p className="text-sm text-gray-600">
                             Semaine du {formatShortDate(monday)} au {formatShortDate(addDays(monday, 4))}
                         </p>
